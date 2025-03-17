@@ -1,0 +1,154 @@
+* {
+    color: white;
+    margin: 0;
+    background-color: rgb(50, 50, 50);
+    font-family: 'Open Sans', sans-serif;
+}
+
+h1 {
+    height: 120px;
+    margin-top: 12px;
+    margin-left: 24px;
+}
+
+#content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 300px);
+    position: relative;
+}
+
+table {
+    border-collapse: collapse;
+    width: 400px;
+    height: 400px;
+    margin: 20px auto;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+td {
+    font-size: 42px;
+    border: 1px solid white;
+    width: 120px;
+    height: 120px;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+tr:first-child td {
+    border-top: none;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+td:first-child {
+    border-left: none;
+}
+
+td:last-child {
+    border-right: none;
+}
+
+.cross,
+.circle {
+    width: 100px;
+    height: 100px;
+    filter: drop-shadow(2px 2px 4px rgba(50, 50, 50, 0.3));
+}
+
+.cross_current,
+.circle_current {
+    width: 80px;
+    height: 80px;
+    filter: drop-shadow(2px 2px 4px rgba(50, 50, 50, 0.3));
+}
+
+@keyframes drawCircle {
+    0% {
+        stroke-dashoffset: 113.1;
+    }
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes drawCross {
+    0% {
+        stroke-dashoffset: 51;
+    }
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.animate .circle-path {
+    animation: drawCircle 0.3s linear forwards;
+}
+
+.animate .cross-line {
+    animation: drawCross 0.2s linear forwards;
+}
+
+.winning_line {
+    position: absolute;
+    background-color: red;
+    height: 5px;
+    border-radius: 5px;
+    width: 366.806px;
+    left: 180.191px;
+    top: 247.597px;
+    transform: rotate(1.5708rad);
+}
+
+.overlay {
+    position: absolute;
+    top: 0px;
+    left: 0;
+    min-height: calc(100vh - 80px);
+    width: 100%;
+    background-color: rgba(50, 50, 50, 0.705);
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 70px;
+}
+
+.overlay h2 {
+    color: #FFC000;
+    font-size: 36px;
+}
+
+.overlay button {
+    color: rgb(187, 27, 27);
+    font-size: 36px;
+    border: 2px solid rgb(187, 27, 27);
+    border-radius: 100%;
+    cursor: pointer;
+}
+
+.overlay button:hover {
+    color: rgb(223, 17, 17);
+    border: 2px solid rgb(223, 17, 17);
+    ;
+}
+
+.d_none {
+    display: none;
+}
+
+.svg {
+    display: flex;
+    justify-content: center;
+}
+
+h3 {
+    text-align: center;
+    font-size: 24px;
+}

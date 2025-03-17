@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicTacTo</title>
+    <link rel="stylesheet" href="./style.css">
+
+</head>
+
+<body onload="render()">
+
+    <div id="overlay" class="overlay d_none">
+        <h2 id="overlay_Text"></h2>
+        <button onclick="closeOverlay()">X</button>
+    </div>
+
+    <h1>Tic Tac Toe</h1>
+    <div>
+        <h3>Current Player</h3>
+        <div class="svg">
+            <svg id="cross" class="cross_current" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <line x1="30" y1="30" x2="70" y2="70" stroke="#FFC000" stroke-width="8" />
+            <line x1="70" y1="30" x2="30" y2="70" stroke="#FFC000" stroke-width="8" />
+        </svg>
+            <svg id="circle" class="circle_current" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle class="circle-path" cx="50" cy="50" r="20" stroke="#00B0EF" stroke-width="6" fill="none"/>
+        </svg>
+        </div>
+    </div>
+    <div id="content"></div>
+
+
+
+
+
+    <script src="./script.js"></script>
+</body>
+
+</html>
