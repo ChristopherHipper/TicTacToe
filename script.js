@@ -10,6 +10,17 @@ let fields = [
     null
 ];
 
+const winningCombinations = [ // ein Array in dem alle GewinnCombinationen in Arrays drin sind
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8], // Horizontal
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8], // Vertikal
+    [0, 4, 8],
+    [2, 4, 6] // Diagonal
+];
+
 let currentPlayer = 'circle'; // variabel die beim beginn des spieles auf circle steht (also wird das erste symbol ein kreis)
 let gameOver = false;
 
@@ -69,17 +80,6 @@ function render() {
 }
 
 function endGame() {
-    const winningCombinations = [ // ein Array in dem alle GewinnCombinationen in Arrays drin sind
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8], // Horizontal
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8], // Vertikal
-        [0, 4, 8],
-        [2, 4, 6] // Diagonal
-    ];
-
     for (let combination of winningCombinations) { // eine For schleife die die indexes von winningCombination in die variable combination packt (erster durchgang index=0 ([0,1,2])...)
         const [a, b, c] = combination; // packt das array combination in die const die wie ein array aufgebaut ist. Um das Array passend zu übergeben 
         if (fields[a] && fields[a] === fields[b] && fields[a] === fields[c]) { // if abfrage ob die Gewinn Combinationen auch den selben wert hat 3x(circle oder crosses)
@@ -155,25 +155,60 @@ function currentPlayerIndicator() {
 }
 
 function makeRandomMove() {
-    if (currentPlayer === 'cross') {
-        let emptyFields = fields
-            .map((value, idx) => (value === null ? idx : null))
-            .filter(idx => idx !== null); // Liste aller leeren Felder
-        if (emptyFields.length === 0) return; // Falls keine freien Felder mehr da sind
-        let randomIndex = emptyFields[Math.floor(Math.random() * emptyFields.length)];
-        fields[randomIndex] = 'cross';
-        let cell = document.querySelectorAll("td")[randomIndex]; // Hole das angeklickte Feld //querlySelectorAll(greift auf alle td's zu) da wir noch den index mit einfügen nur auf das eine td
-        cell.innerHTML = getCrossSVG();; // Füge das Symbol in das Feld ein
-        setTimeout(() => { // Füge die Animationsklasse nachträglich hinzu
-            let symbol = cell.querySelector("svg");
-            if (symbol) {
-                symbol.classList.add("animate");
+    if (currentPlayer !== 'cross') return; // Falls nicht Cross am Zug ist, beenden
+
+    let emptyFields = fields
+        .map((value, idx) => (value === null ? idx : null))
+        .filter(idx => idx !== null); // Liste aller leeren Felder
+
+    if (emptyFields.length === 0) return; // Falls keine freien Felder mehr da sind, beenden
+
+    let bestMove = null;
+
+    // 1. Prüfe, ob Cross gewinnen kann
+    for (let combination of winningCombinations) {
+        let [a, b, c] = combination;
+        let values = [fields[a], fields[b], fields[c]];
+
+        if (values.filter(v => v === 'cross').length === 2 && values.includes(null)) {
+            bestMove = combination.find(idx => fields[idx] === null);
+            break; // Sobald ein Gewinnzug gefunden wurde, beenden
+        }
+    }
+
+    // 2. Falls kein Gewinnzug für Cross vorhanden ist, blockiere Circle
+    if (bestMove === null) {
+        for (let combination of winningCombinations) {
+            let [a, b, c] = combination;
+            let values = [fields[a], fields[b], fields[c]];
+
+            if (values.filter(v => v === 'circle').length === 2 && values.includes(null)) {
+                bestMove = combination.find(idx => fields[idx] === null);
+                break; // Sobald ein Blockadezug gefunden wurde, beenden
             }
-        }, 10);
-        currentPlayer = 'circle';
-        endGame()
-        currentPlayerIndicator();
-    } else return
+        }
+    }
+
+    // 3. Falls kein Gewinn- oder Blockadezug vorhanden ist, wähle ein zufälliges freies Feld
+    if (bestMove === null) {
+        bestMove = emptyFields[Math.floor(Math.random() * emptyFields.length)];
+    }
+
+    // Setze Cross an die berechnete Position
+    fields[bestMove] = 'cross';
+    let cell = document.querySelectorAll("td")[bestMove];
+    cell.innerHTML = getCrossSVG();
+
+    setTimeout(() => {
+        let symbol = cell.querySelector("svg");
+        if (symbol) {
+            symbol.classList.add("animate");
+        }
+    }, 10);
+
+    currentPlayer = 'circle'; // Spieler wechseln
+    endGame(); // Überprüfe, ob das Spiel vorbei ist
+    currentPlayerIndicator(); // Aktualisiere den Spieleranzeiger
 }
 
 function checkGameOver() {
