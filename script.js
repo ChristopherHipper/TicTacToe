@@ -10,7 +10,7 @@ let fields = [
     null
 ];
 
-const winningCombinations = [ // ein Array in dem alle GewinnCombinationen in Arrays drin sind
+const winningCombinations = [ // ein Array in dem alle Gewinn Combinationen in Arrays drin sind
     [0, 1, 2],
     [3, 4, 5],
     [6, 7, 8], // Horizontal
@@ -23,38 +23,6 @@ const winningCombinations = [ // ein Array in dem alle GewinnCombinationen in Ar
 
 let currentPlayer = 'circle'; // variabel die beim beginn des spieles auf circle steht (also wird das erste symbol ein kreis)
 let gameOver = false;
-
-function getCircleSVG() {
-    return `<svg class="circle" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                               <circle class="circle-path" cx="50" cy="50" r="18" stroke="#00B0EF" stroke-width="6" fill="none" stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
-            </svg>`;
-}
-
-function getCrossSVG() {
-    return `<svg class="cross" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <line class="cross-line" x1="32" y1="32" x2="68" y2="68" stroke="#FFC000" stroke-width="6" stroke-dasharray="51" stroke-dashoffset="51" />
-                <line class="cross-line" x1="68" y1="32" x2="32" y2="68" stroke="#FFC000" stroke-width="6" stroke-dasharray="51" stroke-dashoffset="51" />
-            </svg>`;
-}
-
-function addSymbol(index) { // onclick funktion auf die einzelenden table datas
-    if (fields[index] !== null || gameOver) return; // Falls das Feld schon belegt ist, nichts tun
-    fields[index] = currentPlayer; // Setze den aktuellen Spieler auf das Feld
-    let cell = document.querySelectorAll("td")[index]; // Hole das angeklickte Feld //querlySelectorAll(greift auf alle td's zu) da wir noch den index mit einfügen nur auf das eine td
-    let symbolSVG = currentPlayer === 'circle' ? getCircleSVG() : getCrossSVG(); // Wähle das passende Symbol
-    cell.innerHTML = symbolSVG; // Füge das Symbol in das Feld ein
-    setTimeout(() => { // Füge die Animationsklasse nachträglich hinzu
-        let symbol = cell.querySelector("svg");
-        if (symbol) {
-            symbol.classList.add("animate");
-        }
-    }, 10);
-    currentPlayer = currentPlayer === 'circle' ? 'cross' : 'circle'; // Wechsle den Spieler
-    endGame()
-    if (gameOver) return;
-    currentPlayerIndicator();
-    setTimeout(makeRandomMove, 800);
-}
 
 function render() {
     let contentDiv = document.getElementById('content');
@@ -79,47 +47,76 @@ function render() {
     currentPlayerIndicator();
 }
 
+function getCircleSVG() {
+    return `<svg class="circle" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                               <circle class="circle-path" cx="50" cy="50" r="18" stroke="#00B0EF" stroke-width="6" fill="none" stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
+            </svg>`;
+}
+
+function getCrossSVG() {
+    return `<svg class="cross" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <line class="cross-line" x1="32" y1="32" x2="68" y2="68" stroke="#FFC000" stroke-width="6" stroke-dasharray="51" stroke-dashoffset="51" />
+                <line class="cross-line" x1="68" y1="32" x2="32" y2="68" stroke="#FFC000" stroke-width="6" stroke-dasharray="51" stroke-dashoffset="51" />
+            </svg>`;
+}
+
+function addSymbol(index) { // onclick funktion auf die einzelenden table datas
+    if (fields[index] !== null || gameOver) return; // Falls das Feld schon belegt ist, nichts tun
+    fields[index] = currentPlayer; // Setze den aktuellen Spieler auf das Feld
+    let cell = document.querySelectorAll("td")[index]; // Hole das angeklickte Feld //querlySelectorAll(greift auf alle td's zu) da wir noch den index mit einfügen nur auf das eine td
+    cell.innerHTML = getCircleSVG(); // Füge den Kreis in das Feld ein
+    setTimeout(() => { // Füge die Animationsklasse nachträglich hinzu
+        let symbol = cell.querySelector("svg");
+        if (symbol) {
+            symbol.classList.add("animate");
+        }
+    }, 10);
+    currentPlayer = 'cross'; // Wechsle den Spieler
+    endGame()
+    if (gameOver) return;   // wenn das Spiel durch diesen Zug beendet ist beende die Funktion
+    currentPlayerIndicator();
+    setTimeout(makeRandomMove, 800);
+}
+
 function endGame() {
     for (let combination of winningCombinations) { // eine For schleife die die indexes von winningCombination in die variable combination packt (erster durchgang index=0 ([0,1,2])...)
         const [a, b, c] = combination; // packt das array combination in die const die wie ein array aufgebaut ist. Um das Array passend zu übergeben 
         if (fields[a] && fields[a] === fields[b] && fields[a] === fields[c]) { // if abfrage ob die Gewinn Combinationen auch den selben wert hat 3x(circle oder crosses)
-            drawWinningLine(a, c);
-            gameOver = true;
-            openOverlay();
-            chooseWinner(a, b, c);
+            drawWinningLine(a, c); // wenn true zeichne die linie dadurch
+            gameOver = true;        // setzte Game over auf true
+            openOverlay();          // öffne das overlay
+            chooseWinner(a, b, c);  // und gebe den gewinner bekannt
             return;
-        } else { checkGameOver() }
+        } else { checkGameOver() }  // falls false checke ob das spiel vorbei ist 
     }
 }
 
-function drawWinningLine(start, end) {
-    let cells = document.querySelectorAll("td");
-    let startRect = cells[start].getBoundingClientRect(); //getBoundingClientRect() gibt die Position und Größe eines Elements relativ zum Viewport zurück.
-    let endRect = cells[end].getBoundingClientRect();
-    let contentRect = document.getElementById("content").getBoundingClientRect();
-    let x1 = startRect.left + startRect.width / 2 - contentRect.left; // Berechnung der Mittelpunkte der drei Gewinnfelder
-    let y1 = startRect.top + startRect.height / 2 - contentRect.top;
-    let x3 = endRect.left + endRect.width / 2 - contentRect.left;
-    let y3 = endRect.top + endRect.height / 2 - contentRect.top;
-    let width = Math.hypot(x3 - x1, y3 - y1) + 100; // Berechnung der gesamten Linienlänge durch alle drei Punkte
-    let line = document.createElement("div"); // Erstellen und Stylen der Linie
-    line.classList.add('winning_line');
-    let angle = Math.atan2(y3 - y1, x3 - x1);
-    if (y1 === y3) {
-        // Horizontale Linie
-        line.style.left = Math.min(x1, x3) - 50 + "px";
-        line.style.top = y1 - 7 + "px";
-    } else if (x1 === x3) {
-        // Vertikale Linie
-        line.style.left = x1 - width / 2 + "px";
-        line.style.top = Math.min(y1, y3) - 7 + 134 + "px";
-    } else {
-        // Diagonale Linie
-        line.style.left = Math.min(x1, x3) - 50 + "px";
-        line.style.top = (y1 + y3) / 2 - 7 + "px";
-    }
-    line.style.transform = `rotate(${angle}rad)`; // Drehung der Linie, um sich an den Verlauf der Gewinnfelder anzupassen
-    document.getElementById("content").appendChild(line); // einfügen der linie in die ID
+function drawWinningLine(start, end) {  // funktion die eine linie durch die 3 passenden Symbole zeichnet 
+    const lineColor = '#ffffff';
+    const lineWidth = 5;
+  
+    const startCell = document.querySelectorAll(`td`)[start]; // greift auf die td mit den index von dem start gewinner indexes z.B. 0
+    const endCell = document.querySelectorAll(`td`)[end];   // greift auf die td mit den index von dem ende des gewinner indexes z.B.2
+    const startRect = startCell.getBoundingClientRect(); //getBoundingClientRect() gibt die position vom start td (bottom,height,left,right...)
+    const endRect = endCell.getBoundingClientRect();//getBoundingClientRect() gibt die position vom end td (bottom,height,left,right...)
+  
+    const contentRect = document.getElementById('content').getBoundingClientRect();//getBoundingClientRect() gibt die position vom content container(bottom,height,left,right...)
+  
+    const lineLength = Math.sqrt( // berechnet die läng der linie mit dem Satz des Pythagoras
+      Math.pow(endRect.left - startRect.left, 2) + Math.pow(endRect.top - startRect.top, 2)
+    );
+    const lineAngle = Math.atan2(endRect.top - startRect.top, endRect.left - startRect.left); // rechnet den winkel der linie aus
+  
+    const line = document.createElement('div'); // erzeugt ein div und stylet die linie
+    line.style.position = 'absolute';
+    line.style.width = `${lineLength}px`;
+    line.style.height = `${lineWidth}px`;
+    line.style.backgroundColor = lineColor;
+    line.style.top = `${startRect.top + startRect.height / 2 - lineWidth / 2 - contentRect.top}px`;
+    line.style.left = `${startRect.left + startRect.width / 2 - contentRect.left}px`;
+    line.style.transform = `rotate(${lineAngle}rad)`;
+    line.style.transformOrigin = `top left`;
+    document.getElementById('content').appendChild(line); // der linien div wird in den container eingefügt
 }
 
 function openOverlay() {
@@ -133,7 +130,7 @@ function closeOverlay() {
     location.reload();
 }
 
-function chooseWinner(a, b, c) {
+function chooseWinner(a, b, c) { // funktion die abfragt wer gewonnen hat. wenn die parameter circle sind hat der Spieler gewonnen. Wenn cross dann der PC
     let overlayText = document.getElementById("overlay_Text");
     if (fields[a] && fields[b] && fields[c] === 'circle') {
         overlayText.innerHTML = "Winner!";
@@ -142,7 +139,7 @@ function chooseWinner(a, b, c) {
     }
 }
 
-function currentPlayerIndicator() {
+function currentPlayerIndicator() { // zeigt im HTML an wer gerade dran ist. Wenn Cross soll circle abdunken und anders herum 
     let crossElement = document.getElementById("cross");
     let circleElement = document.getElementById("circle");
     if (currentPlayer === 'circle') {
@@ -155,29 +152,21 @@ function currentPlayerIndicator() {
 }
 
 function makeRandomMove() {
-    if (currentPlayer !== 'cross') return; // Falls nicht Cross am Zug ist, beenden
-
     let emptyFields = fields
-        .map((value, idx) => (value === null ? idx : null))
-        .filter(idx => idx !== null); // Liste aller leeren Felder
-
-    if (emptyFields.length === 0) return; // Falls keine freien Felder mehr da sind, beenden
-
+        .map((value, idx) => (value === null ? idx : null)) // map geht durch das fields array. Value=Wert(corss,circle oder null) im array, idx=Index / If abfrage ist der wert=null? dann push den index in das neue Array. Wenn nicht push null in das neue Array
+        .filter(newValue => newValue !== null); // filter entfernt alle null aus den neun array damit nur noch die indexes der freien felder da sind / newValue = wert im neuen array (index oder null) if abfrage newValue ist NICHT null / wenn true bleibt es im array wenn false dann raus schmeißen
     let bestMove = null;
-
     // 1. Prüfe, ob Cross gewinnen kann
-    for (let combination of winningCombinations) {
-        let [a, b, c] = combination;
-        let values = [fields[a], fields[b], fields[c]];
-
-        if (values.filter(v => v === 'cross').length === 2 && values.includes(null)) {
-            bestMove = combination.find(idx => fields[idx] === null);
+    for (let combination of winningCombinations) { // for schleife durch gewinnCombinationen in die variable combination gespeichert
+        let [a, b, c] = combination;                // beispile a=index0 b=index1 c=index3
+        let values = [fields[a], fields[b], fields[c]]; // ein array in dem die combination gespeichert ist
+        if (values.filter(v => v === 'cross').length === 2 && values.includes(null)) { // filtert dieses array wie viele cross in dem array sind wenn 2 crosses gefiltert sind && im value ein Null ist dann wäre das der bestmove
+            bestMove = combination.find(idx => fields[idx] === null); // die combination in der die if abfrage true ist die gewinn combination / mit find suchen wir dann im combination array nach dem index der null ist. Der index ist dann best move
             break; // Sobald ein Gewinnzug gefunden wurde, beenden
         }
     }
-
     // 2. Falls kein Gewinnzug für Cross vorhanden ist, blockiere Circle
-    if (bestMove === null) {
+    if (bestMove === null) {    // das selbe wie oben nur anstatt cross circle
         for (let combination of winningCombinations) {
             let [a, b, c] = combination;
             let values = [fields[a], fields[b], fields[c]];
@@ -188,12 +177,10 @@ function makeRandomMove() {
             }
         }
     }
-
     // 3. Falls kein Gewinn- oder Blockadezug vorhanden ist, wähle ein zufälliges freies Feld
     if (bestMove === null) {
         bestMove = emptyFields[Math.floor(Math.random() * emptyFields.length)];
     }
-
     // Setze Cross an die berechnete Position
     fields[bestMove] = 'cross';
     let cell = document.querySelectorAll("td")[bestMove];
@@ -211,9 +198,9 @@ function makeRandomMove() {
     currentPlayerIndicator(); // Aktualisiere den Spieleranzeiger
 }
 
-function checkGameOver() {
+function checkGameOver() { // funktion die abfragt ob noch freier platz im array ist. Falls nicht overlay öffnen und spiel beenden
     let overlayText = document.getElementById("overlay_Text");
-    if (!fields.includes(null)) { // abfrage ob im array ein null enthalten ist. 
+    if (!fields.includes(null)) { // abfrage ob im array ein null enthalten ist. Durch das ! dreht man die frage um
         openOverlay();
         overlayText.innerHTML = "Game Over!";
     } else return
